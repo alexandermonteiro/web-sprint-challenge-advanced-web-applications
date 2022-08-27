@@ -36,6 +36,7 @@ export default function App() {
   const logout = () => {
     localStorage.removeItem("token");
     redirectToLogin();
+    setMessage("Goodbye!");
     // ✨ implement
     // If a token is in local storage it should be removed,
     // and a message saying "Goodbye!" should be set in its proper state.
@@ -44,6 +45,8 @@ export default function App() {
   };
 
   const login = ({ username, password }) => {
+    setMessage("");
+    setSpinnerOn(true);
     // ✨ implement
     // We should flush the message state, turn on the spinner
     // and launch a request to the proper endpoint.
@@ -51,9 +54,11 @@ export default function App() {
     // put the server success message in its proper state, and redirect
     // to the Articles screen. Don't forget to turn off the spinner!
     axios
-      .post(loginUrl, { username, password })
+      .post("http://localhost:9000/api/login", { username, password })
       .then((res) => {
         localStorage.setItem("token", res.data.token);
+        setMessage(res.data.message);
+        setSpinnerOn(false);
         redirectToArticles();
       })
       .catch((err) => {
@@ -64,10 +69,13 @@ export default function App() {
   const getArticles = () => {
     // ✨ implement
     // We should flush the message state, turn on the spinner
+    // setMessage("");
+    setSpinnerOn(true);
     axiosWithAuth()
-      .get(articlesUrl)
+      .get("http://localhost:9000/api/articles")
       .then((res) => {
         setArticles(res.data.articles);
+        setMessage(res.data.message);
       })
       .catch((err) => {
         console.log(err);
@@ -78,11 +86,12 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
+    setSpinnerOn(false);
   };
 
   const postArticle = (article) => {
     axiosWithAuth()
-      .post(articlesUrl, article)
+      .post("http://localhost:9000/api/articles", article)
       // url: articlesUrl,
       // data: article,
       // method: "post",
@@ -92,6 +101,7 @@ export default function App() {
 
       .then((res) => {
         setArticles(articles.concat(res.data.article));
+        setMessage(res.data.message);
       })
       .catch((err) => {
         console.log(err);
@@ -102,20 +112,46 @@ export default function App() {
     // to inspect the response from the server.
   };
 
-  const updateArticle = ({ article_id, article }) => {
+  const updateArticle = ({ article }) => {
+    const { article_id } = article;
+    axiosWithAuth()
+      .put(`http://localhost:9000/api/articles/${article_id}`, article)
+      .then((res) => {
+        console.log("updatre", res);
+        setArticles(
+          articles.map((art) =>
+            art.article_id === article_id ? res.data.article : art
+          )
+        );
+        setMessage(res.data.message);
+        setCurrentArticleId(null);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
     // ✨ implement
     // You got this!
   };
 
   const deleteArticle = (article_id) => {
+    axiosWithAuth()
+      .delete(`http://localhost:9000/api/articles/${article_id}`)
+      .then((res) => {
+        setArticles(articles.filter((art) => art.article_id !== article_id));
+        setMessage(res.data.message);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     // ✨ implement
   };
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
-      <Spinner />
-      <Message />
+      <Spinner on={spinnerOn} />
+      <Message message={message} />
       <button id="logout" onClick={logout}>
         Logout from app
       </button>
@@ -137,8 +173,21 @@ export default function App() {
             path="articles"
             element={
               <>
-                <ArticleForm postArticle={postArticle} />
-                <Articles getArticles={getArticles} articles={articles} />
+                <ArticleForm
+                  currentArticle={articles.find(
+                    (art) => art.article_id === currentArticleId
+                  )}
+                  postArticle={postArticle}
+                  updateArticle={updateArticle}
+                  setCurrentArticleId={setCurrentArticleId}
+                />
+                <Articles
+                  getArticles={getArticles}
+                  articles={articles}
+                  deleteArticle={deleteArticle}
+                  setCurrentArticleId={setCurrentArticleId}
+                  currentArticleId={currentArticleId}
+                />
               </>
             }
           />

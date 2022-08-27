@@ -40,11 +40,24 @@ export default function ArticleForm(props) {
     setValues(initialFormValues);
   };
 
-  const isDisabled = () => {
+  const isDisabled = (disabled) => {
+    if (values.title.trim().length < 1) {
+      return disabled === true;
+    }
+    if (values.title.trim().length < 1) {
+      return disabled === true;
+    }
+    if (values.title.trim().length < 1) {
+      return disabled === true;
+    }
+
     // ✨ implement
     // Make sure the inputs have some values
   };
 
+  const cancelEdit = () => {
+    setCurrentArticleId(null);
+  };
   return (
     // ✨ fix the JSX: make the heading display either "Edit" or "Create"
     // and replace Function.prototype with the correct function
@@ -71,10 +84,12 @@ export default function ArticleForm(props) {
         <option value="Node">Node</option>
       </select>
       <div className="button-group">
-        <button disabled={isDisabled()} id="submitArticle">
+        <button disabled={isDisabled(true)} id="submitArticle">
           Submit
         </button>
-        <button onClick={Function.prototype}>Cancel edit</button>
+        {currentArticle && (
+          <button onClick={() => cancelEdit()}>Cancel edit</button>
+        )}
       </div>
     </form>
   );

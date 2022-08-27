@@ -3,7 +3,13 @@ import { Navigate } from "react-router-dom";
 import PT from "prop-types";
 
 export default function Articles(props) {
-  const { articles, getArticles } = props;
+  const {
+    articles,
+    getArticles,
+    setCurrentArticleId,
+    currentArticleId,
+    deleteArticle,
+  } = props;
   // ✨ where are my props? Destructure them here
 
   if (!localStorage.getItem("token")) {
@@ -33,10 +39,16 @@ export default function Articles(props) {
                   <p>Topic: {art.topic}</p>
                 </div>
                 <div>
-                  <button disabled={true} onClick={Function.prototype}>
+                  <button
+                    disabled={currentArticleId ? true : false}
+                    onClick={() => setCurrentArticleId(art.article_id)}
+                  >
                     Edit
                   </button>
-                  <button disabled={true} onClick={Function.prototype}>
+                  <button
+                    disabled={currentArticleId ? true : false}
+                    onClick={() => deleteArticle(art.article_id)}
+                  >
                     Delete
                   </button>
                 </div>
