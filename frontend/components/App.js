@@ -112,12 +112,11 @@ export default function App() {
     // to inspect the response from the server.
   };
 
-  const updateArticle = ({ article }) => {
+  const updateArticle = (article) => {
     const { article_id } = article;
     axiosWithAuth()
       .put(`http://localhost:9000/api/articles/${article_id}`, article)
       .then((res) => {
-        console.log("updatre", res);
         setArticles(
           articles.map((art) =>
             art.article_id === article_id ? res.data.article : art
